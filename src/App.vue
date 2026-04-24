@@ -130,7 +130,14 @@ body { font-family: 'Noto Sans TC', -apple-system, sans-serif; min-height: 100vh
 .dark .aplayer .aplayer-controller .aplayer-time { color: #9ca3af !important; }
 .dark .aplayer .aplayer-controller .aplayer-time .aplayer-icon path { fill: #9ca3af !important; }
 .dark .aplayer .aplayer-list ol li .aplayer-list-author { color: #666 !important; }
-.aplayer .aplayer-pic { border-radius: 12px !important; }
+/* Cover: circular + spin like turntable */
+.aplayer .aplayer-pic { border-radius: 50% !important; transition: box-shadow 0.3s; }
+.aplayer .aplayer-pic.aplayer-pause { animation: none !important; }
+@keyframes coverSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.aplayer .aplayer-pic { animation: coverSpin 8s linear infinite; animation-play-state: paused; }
+.aplayer.aplayer-playing .aplayer-pic { animation-play-state: running; }
+.dark .aplayer .aplayer-pic { background: #ffffff !important; box-shadow: 0 0 30px rgba(237,198,38,0.3); }
+.dark .aplayer.aplayer-playing .aplayer-pic { box-shadow: 0 0 40px rgba(237,198,38,0.5), 0 0 80px rgba(237,198,38,0.15); }
 .aplayer .aplayer-lrc p { font-size: 14px !important; }
 .aplayer .aplayer-lrc p.aplayer-lrc-current { font-size: 16px !important; font-weight: 700 !important; }
 
