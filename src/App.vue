@@ -430,7 +430,7 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
 .pv-ctrl{background:none;border:none;color:var(--text2);font-size:26px;cursor:pointer;padding:10px;transition:all 0.2s}
 .pv-ctrl:hover{color:var(--text1)}
 .pv-ctrl.active{color:var(--gold)}
-.pv-ctrl.main-play{font-size:32px;background:var(--play-bg);color:var(--play-color);width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pv-ctrl.main-play{font-size:30px;background:var(--play-bg);color:var(--play-color);width:68px;height:68px;min-width:68px;min-height:68px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;aspect-ratio:1}
 .pv-ctrl.main-play:hover{transform:scale(1.06)}
 .pv-vol{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px}
 .pv-vol button{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer}
