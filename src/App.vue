@@ -41,9 +41,13 @@
           <button class="pv-ctrl" @click="nextTrack"><i class="icon-skip-forward"></i></button>
           <button class="pv-ctrl" :class="{ active: isShuffle }" @click="isShuffle = !isShuffle"><i class="icon-shuffle"></i></button>
         </div>
-        <div class="pv-vol">
+        <div class="pv-vol" v-if="!isMobileDevice">
           <button @click="toggleMute"><i :class="volIcon"></i></button>
           <input type="range" min="0" max="1" step="0.01" :value="volume" @input="setVol($event.target.value)" />
+        </div>
+        <div class="pv-vol-hint" v-else>
+          <i class="icon-volume-2" style="font-size:14px;color:var(--text3)"></i>
+          <span>使用手機音量鍵調整</span>
         </div>
       </div>
     </div>
@@ -215,6 +219,8 @@ const volIcon = computed(() => {
   return 'icon-volume-2'
 })
 
+const isMobileDevice = ref(false)
+
 const currentLyricText = computed(() => {
   if (activeLyricIdx.value >= 0 && currentLyrics.value[activeLyricIdx.value]) {
     return currentLyrics.value[activeLyricIdx.value].text
@@ -343,6 +349,8 @@ function scrollToActiveLyric() {
 }
 
 onMounted(() => {
+  isMobileDevice.value = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
   const saved = localStorage.getItem('theme')
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     isDark.value = true
@@ -428,6 +436,7 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
 .pv-vol button{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer}
 .pv-vol input{-webkit-appearance:none;width:100px;height:3px;border-radius:2px;background:var(--border);outline:none}
 .pv-vol input::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--text1);cursor:pointer}
+.pv-vol-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;color:var(--text3)}
 
 /* ===== LYRICS VIEW ===== */
 .lyrics-fullview{background:var(--lyrics-bg);position:relative}
