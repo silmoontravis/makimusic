@@ -24,7 +24,11 @@
           <button class="pv-act"><i class="icon-download"></i><span>下載</span></button>
           <button class="pv-act" @click="mobileView = 'lyrics'"><i class="icon-text"></i><span>歌詞</span></button>
         </div>
-        <div class="pv-progress">
+        <div class="pv-lyric-line" @click="mobileView = 'lyrics'" v-if="currentTrack">
+          <span v-if="currentLyricText">{{ currentLyricText }}</span>
+          <span v-else class="pv-lyric-hint">點擊查看歌詞</span>
+        </div>
+      <div class="pv-progress">
           <div class="pv-prog-bar" @click="seek($event)">
             <div class="pv-prog-fill" :style="{ width: progress + '%' }"></div>
           </div>
@@ -209,6 +213,13 @@ const volIcon = computed(() => {
   if (isMuted.value || volume.value === 0) return 'icon-volume-x'
   if (volume.value < 0.5) return 'icon-volume-1'
   return 'icon-volume-2'
+})
+
+const currentLyricText = computed(() => {
+  if (activeLyricIdx.value >= 0 && currentLyrics.value[activeLyricIdx.value]) {
+    return currentLyrics.value[activeLyricIdx.value].text
+  }
+  return ''
 })
 
 // Lyrics storage
@@ -399,6 +410,9 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
 .pv-act{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:color 0.2s}
 .pv-act span{font-size:10px}
 .pv-act:hover,.pv-act.active{color:var(--gold)}
+.pv-lyric-line{width:100%;text-align:center;padding:12px 16px;margin-bottom:8px;font-size:15px;font-weight:600;color:var(--blue);min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;background:rgba(0,95,223,0.06);transition:all 0.3s}
+[data-theme="dark"] .pv-lyric-line{color:var(--gold);background:rgba(237,198,38,0.08)}
+.pv-lyric-hint{font-size:13px;font-weight:400;color:var(--text3)}
 .pv-progress{width:100%;margin-bottom:4px}
 .pv-prog-bar{width:100%;height:4px;background:var(--border);border-radius:2px;cursor:pointer;position:relative}
 .pv-prog-bar:hover{height:6px}
