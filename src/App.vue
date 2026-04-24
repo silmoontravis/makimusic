@@ -21,7 +21,7 @@
         <div class="pv-actions">
           <button class="pv-act" @click="mobileView = 'library'"><i class="icon-plus"></i><span>加入</span></button>
           <button class="pv-act" :class="{ active: isFav }" @click="isFav = !isFav"><i class="icon-heart"></i><span>收藏</span></button>
-          <button class="pv-act"><i class="icon-download"></i><span>下載</span></button>
+          <button class="pv-act" @click="downloadTrack"><i class="icon-download"></i><span>下載</span></button>
           <button class="pv-act" @click="mobileView = 'lyrics'"><i class="icon-text"></i><span>歌詞</span></button>
         </div>
         <div class="pv-lyric-line" @click="mobileView = 'lyrics'" v-if="currentTrack">
@@ -96,8 +96,35 @@
       </div>
     </div>
 
+    <!-- ===== MOBILE: Explore View ===== -->
+    <div class="view explore-view" :class="{ active: mobileView === 'explore' }">
+      <div class="lib-header">
+        <h2>探索</h2>
+      </div>
+      <div class="explore-content">
+        <div class="explore-album">
+          <div class="explore-cover"><img src="/logo_blue_clean.png" alt="HeyBoss" /></div>
+          <div class="explore-album-info">
+            <div class="explore-album-title">全新生活專輯</div>
+            <div class="explore-album-artist">HeyBoss Audio</div>
+            <div class="explore-album-meta">4 首歌 · 2026</div>
+          </div>
+        </div>
+        <div class="explore-desc">
+          <h3>關於這張專輯</h3>
+          <p>「全新生活」系列是 HeyBoss Audio 的首張專輯，以健康生活為主題，涵蓋飲食、運動、跑步、瑜伽四大面向。用音樂陪你養成好習慣，21天改變生活！</p>
+        </div>
+        <div class="explore-tags">
+          <span class="explore-tag">健康</span>
+          <span class="explore-tag">運動</span>
+          <span class="explore-tag">AI 音樂</span>
+          <span class="explore-tag">Suno V5</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== MOBILE: Bottom Mini Player ===== -->
-    <div class="bottom-mini" v-if="mobileView === 'library' && curIdx >= 0" @click="mobileView = 'player'">
+    <div class="bottom-mini" v-if="(mobileView === 'library' || mobileView === 'explore') && curIdx >= 0" @click="mobileView = 'player'">
       <div class="bm-cover"><img src="/logo_blue_clean.png" alt="" /></div>
       <div class="bm-info">
         <div class="t">{{ currentTrack?.title }}</div>
@@ -107,10 +134,10 @@
     </div>
 
     <!-- ===== MOBILE: Bottom Nav ===== -->
-    <div class="bottom-nav" v-if="mobileView === 'library'">
+    <div class="bottom-nav" v-if="mobileView === 'library' || mobileView === 'explore'">
       <button class="nav-item" @click="mobileView = 'player'"><i class="icon-home"></i><span>首頁</span></button>
-      <button class="nav-item"><i class="icon-search"></i><span>探索</span></button>
-      <button class="nav-item active"><i class="icon-library"></i><span>音樂庫</span></button>
+      <button class="nav-item" :class="{ active: mobileView === 'explore' }" @click="mobileView = 'explore'"><i class="icon-search"></i><span>探索</span></button>
+      <button class="nav-item" :class="{ active: mobileView === 'library' }" @click="mobileView = 'library'"><i class="icon-library"></i><span>音樂庫</span></button>
     </div>
 
     <!-- ===== DESKTOP LAYOUT ===== -->
@@ -325,6 +352,17 @@ function seek(e) {
 
 function seekDesk(e) { seek(e) }
 
+function downloadTrack() {
+  if (curIdx.value < 0) return
+  const track = tracks.value[curIdx.value]
+  const a = document.createElement('a')
+  a.href = track.file
+  a.download = track.title + '.mp3'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
+
 function seekToLyric(i) {
   if (curIdx.value >= 0 && currentLyrics.value[i]) {
     audioEl.value.currentTime = currentLyrics.value[i].t
@@ -477,6 +515,21 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
 .lib-meta{font-size:13px;color:var(--text3);margin-top:3px}
 .lib-more{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px}
 
+/* ===== EXPLORE VIEW ===== */
+.explore-view{background:var(--bg)}
+.explore-content{padding:20px;overflow-y:auto;flex:1}
+.explore-album{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.explore-cover{width:120px;height:120px;border-radius:16px;background:var(--cover-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1)}
+.explore-cover img{width:70%;height:70%;object-fit:contain}
+.explore-album-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.explore-album-artist{font-size:14px;color:var(--text2)}
+.explore-album-meta{font-size:12px;color:var(--text3);margin-top:4px}
+.explore-desc{margin-bottom:20px}
+.explore-desc h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.explore-desc p{font-size:14px;color:var(--text2);line-height:1.7}
+.explore-tags{display:flex;gap:8px;flex-wrap:wrap}
+.explore-tag{padding:6px 14px;border-radius:16px;background:var(--card);color:var(--text2);font-size:13px;border:1px solid var(--border)}
+
 /* ===== BOTTOM MINI PLAYER ===== */
 .bottom-mini{display:flex;background:var(--white);border-top:1px solid var(--border);padding:8px 12px;align-items:center;gap:10px;cursor:pointer}
 .bm-cover{width:44px;height:44px;border-radius:12px;background:var(--cover-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
@@ -549,7 +602,7 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
   .sidebar-desk{display:flex}
   .desk-main{display:flex}
   /* hide mobile elements */
-  .player-view,.lyrics-fullview,.library-view,.bottom-mini,.bottom-nav{display:none !important}
+  .player-view,.lyrics-fullview,.library-view,.explore-view,.bottom-mini,.bottom-nav{display:none !important}
 }
 @media(max-width:768px){
   .sidebar-desk,.desk-main{display:none !important}

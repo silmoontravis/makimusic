@@ -1,1 +1,7 @@
-node_modules\ndist\n.wrangler
+node_modules
+dist
+.wrangler
+*.png.bak
+qa-*.png
+lrc_*_new.txt
+qa-page.html
