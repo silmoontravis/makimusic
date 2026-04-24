@@ -5,11 +5,8 @@
     <div class="view player-view" :class="{ active: mobileView === 'player' }">
       <div class="pv-bg"></div>
       <div class="pv-top">
-        <button @click="mobileView = 'library'"><i class="icon-chevron-down"></i></button>
-        <div style="display:flex;gap:4px">
-          <button @click="toggleTheme" title="明/暗切換"><i :class="isDark ? 'icon-moon' : 'icon-sun'"></i></button>
-          <button @click="mobileView = 'library'"><i class="icon-list-music"></i></button>
-        </div>
+        <div></div>
+        <button @click="toggleTheme" title="明/暗切換" style="padding:8px"><i :class="isDark ? 'icon-moon' : 'icon-sun'"></i></button>
       </div>
       <div class="pv-content">
         <div class="pv-cover" :class="{ spin: isPlaying }">
@@ -49,6 +46,10 @@
           <i class="icon-volume-2" style="font-size:14px;color:var(--text3)"></i>
           <span>使用手機音量鍵調整</span>
         </div>
+        <button class="pv-library-btn" @click="mobileView = 'library'">
+          <i class="icon-library"></i>
+          <span>音樂庫</span>
+        </button>
       </div>
     </div>
 
@@ -543,6 +544,10 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
 .pv-vol input{-webkit-appearance:none;width:100px;height:3px;border-radius:2px;background:var(--border);outline:none}
 .pv-vol input::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--text1);cursor:pointer}
 .pv-vol-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;color:var(--text3)}
+.pv-library-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px 28px;border-radius:24px;border:1px solid var(--border);background:var(--card);color:var(--text1);font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.pv-library-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+[data-theme="dark"] .pv-library-btn:hover{background:var(--gold);color:#111;border-color:var(--gold)}
+.pv-library-btn i{font-size:20px}
 
 /* ===== LYRICS VIEW ===== */
 .lyrics-fullview{background:var(--lyrics-bg);position:relative}
