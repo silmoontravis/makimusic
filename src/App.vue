@@ -19,7 +19,7 @@
         <div class="pv-title">{{ currentTrack?.title || 'HeyBoss Audio' }}</div>
         <div class="pv-artist">{{ currentTrack ? currentTrack.artist : '選擇歌曲開始播放' }}</div>
         <div class="pv-actions">
-          <button class="pv-act" @click="mobileView = 'library'"><i class="icon-plus"></i><span>加入</span></button>
+          <button class="pv-act" :class="{ active: curIdx >= 0 && playlist.includes(curIdx) }" @click="curIdx >= 0 ? togglePlaylist(curIdx) : mobileView = 'library'"><i :class="curIdx >= 0 && playlist.includes(curIdx) ? 'icon-check' : 'icon-plus'"></i><span>{{ curIdx >= 0 && playlist.includes(curIdx) ? '已加入' : '加入' }}</span></button>
           <button class="pv-act" :class="{ active: isFav }" @click="isFav = !isFav"><i class="icon-heart"></i><span>收藏</span></button>
           <button class="pv-act" @click="downloadTrack"><i class="icon-download"></i><span>下載</span></button>
           <button class="pv-act" @click="mobileView = 'lyrics'"><i class="icon-text"></i><span>歌詞</span></button>
@@ -76,22 +76,45 @@
       <div class="lib-header">
         <h2>音樂庫</h2>
         <div class="lib-tabs">
-          <button class="lib-tab active">全部</button>
-          <button class="lib-tab">專輯</button>
-          <button class="lib-tab">播放清單</button>
-          <button class="lib-tab">下載</button>
+          <button class="lib-tab" :class="{ active: libTab === 'all' }" @click="libTab = 'all'">全部</button>
+          <button class="lib-tab" :class="{ active: libTab === 'playlist' }" @click="libTab = 'playlist'">
+            播放清單 <span v-if="playlist.length" class="tab-badge">{{ playlist.length }}</span>
+          </button>
         </div>
       </div>
-      <div class="lib-list">
-        <div v-for="(track, i) in tracks" :key="i" class="lib-item" :class="{ active: i === curIdx }" @click="playTrack(i)">
-          <div class="lib-cover">
+      <!-- All songs -->
+      <div class="lib-list" v-if="libTab === 'all'">
+        <div v-for="(track, i) in tracks" :key="i" class="lib-item" :class="{ active: i === curIdx }">
+          <div class="lib-cover" @click="addAndPlay(i)">
             <img src="/logo_blue_clean.png" alt="cover" />
           </div>
-          <div class="lib-info">
+          <div class="lib-info" @click="addAndPlay(i)">
             <div class="lib-name">{{ track.title }}</div>
             <div class="lib-meta">{{ track.artist }} · {{ track.duration }}</div>
           </div>
-          <button class="lib-more"><i class="icon-more-horizontal"></i></button>
+          <button class="lib-add-btn" :class="{ added: playlist.includes(i) }" @click="togglePlaylist(i)">
+            <i :class="playlist.includes(i) ? 'icon-check' : 'icon-plus'"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Playlist -->
+      <div class="lib-list" v-if="libTab === 'playlist'">
+        <div v-if="playlist.length === 0" class="lib-empty">
+          <i class="icon-music" style="font-size:40px;color:var(--text3);margin-bottom:12px"></i>
+          <p>播放清單是空的</p>
+          <p style="font-size:13px;color:var(--text3);margin-top:4px">去「全部」按 + 加入歌曲</p>
+        </div>
+        <div v-for="(idx, pi) in playlist" :key="idx" class="lib-item" :class="{ active: idx === curIdx }">
+          <div class="lib-cover" @click="playFromPlaylist(pi)">
+            <img src="/logo_blue_clean.png" alt="cover" />
+          </div>
+          <div class="lib-info" @click="playFromPlaylist(pi)">
+            <div class="lib-name">{{ tracks[idx].title }}</div>
+            <div class="lib-meta">{{ tracks[idx].artist }} · {{ tracks[idx].duration }}</div>
+          </div>
+          <button class="lib-add-btn added" @click="removeFromPlaylist(pi)">
+            <i class="icon-x"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -225,6 +248,9 @@ const isMuted = ref(false)
 const curIdx = ref(-1)
 const activeLyricIdx = ref(-1)
 
+const libTab = ref('all')
+const playlist = ref([]) // indices into tracks[]
+
 const audioEl = ref(null)
 const lyricsScrollM = ref(null)
 const lyricsScrollD = ref(null)
@@ -317,17 +343,34 @@ function togglePlay() {
 }
 
 function prevTrack() {
-  if (curIdx.value <= 0) playTrack(tracks.value.length - 1)
-  else playTrack(curIdx.value - 1)
+  if (playlist.value.length > 0) {
+    const plIdx = playlist.value.indexOf(curIdx.value)
+    const prev = plIdx <= 0 ? playlist.value.length - 1 : plIdx - 1
+    playTrack(playlist.value[prev])
+  } else {
+    if (curIdx.value <= 0) playTrack(tracks.value.length - 1)
+    else playTrack(curIdx.value - 1)
+  }
 }
 
 function nextTrack() {
-  if (isShuffle.value) {
-    let n
-    do { n = Math.floor(Math.random() * tracks.value.length) } while (n === curIdx.value && tracks.value.length > 1)
-    playTrack(n)
+  if (playlist.value.length > 0) {
+    const plIdx = playlist.value.indexOf(curIdx.value)
+    if (isShuffle.value) {
+      let n
+      do { n = Math.floor(Math.random() * playlist.value.length) } while (n === plIdx && playlist.value.length > 1)
+      playTrack(playlist.value[n])
+    } else {
+      playTrack(playlist.value[(plIdx + 1) % playlist.value.length])
+    }
   } else {
-    playTrack((curIdx.value + 1) % tracks.value.length)
+    if (isShuffle.value) {
+      let n
+      do { n = Math.floor(Math.random() * tracks.value.length) } while (n === curIdx.value && tracks.value.length > 1)
+      playTrack(n)
+    } else {
+      playTrack((curIdx.value + 1) % tracks.value.length)
+    }
   }
 }
 
@@ -351,6 +394,31 @@ function seek(e) {
 }
 
 function seekDesk(e) { seek(e) }
+
+function togglePlaylist(idx) {
+  const pos = playlist.value.indexOf(idx)
+  if (pos >= 0) {
+    playlist.value.splice(pos, 1)
+  } else {
+    playlist.value.push(idx)
+  }
+}
+
+function addAndPlay(idx) {
+  if (!playlist.value.includes(idx)) {
+    playlist.value.push(idx)
+  }
+  playTrack(idx)
+}
+
+function playFromPlaylist(plIdx) {
+  if (plIdx < 0 || plIdx >= playlist.value.length) return
+  playTrack(playlist.value[plIdx])
+}
+
+function removeFromPlaylist(plIdx) {
+  playlist.value.splice(plIdx, 1)
+}
 
 function downloadTrack() {
   if (curIdx.value < 0) return
@@ -514,6 +582,12 @@ body{font-family:'Noto Sans TC',-apple-system,sans-serif;background:var(--bg);co
 [data-theme="dark"] .lib-item.active .lib-name{color:var(--gold)}
 .lib-meta{font-size:13px;color:var(--text3);margin-top:3px}
 .lib-more{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px}
+.lib-add-btn{background:none;border:1px solid var(--border);color:var(--text2);font-size:20px;cursor:pointer;padding:8px;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+.lib-add-btn.added{border-color:var(--blue);color:var(--blue);background:rgba(0,95,223,0.08)}
+[data-theme="dark"] .lib-add-btn.added{border-color:var(--gold);color:var(--gold);background:rgba(237,198,38,0.08)}
+.lib-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text2);font-size:16px}
+.tab-badge{background:var(--blue);color:#fff;font-size:11px;padding:1px 6px;border-radius:10px;margin-left:4px}
+[data-theme="dark"] .tab-badge{background:var(--gold);color:#111}
 
 /* ===== EXPLORE VIEW ===== */
 .explore-view{background:var(--bg)}
